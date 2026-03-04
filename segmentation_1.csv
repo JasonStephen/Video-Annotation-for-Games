@@ -1,0 +1,2 @@
+﻿segment,time_start(mm:ss),time_end(mm:ss),dominant_category,core_player_decision,risk,t_start_seconds,t_end_seconds
+S1,00:46,01:37,Exploration,Finding a useful Structure,Low,46.996533,97.673938

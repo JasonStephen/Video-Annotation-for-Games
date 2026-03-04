@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>{{project['name']}}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="container">
+  <a href="/">← 返回</a>
+  <h1>{{project['name']}}</h1>
+
+  <div class="card">
+    <h3>上传视频（支持拖拽）</h3>
+    <div id="drop" class="drop">
+      把视频拖到这里，或选择文件
+      <input id="file" type="file" accept="video/*">
+    </div>
+    <div class="row">
+      <input id="fps" placeholder="FPS（可选，例如 60）">
+      <button id="uploadBtn">上传</button>
+    </div>
+    <div class="muted">提示：FPS 不是必须，但想要“帧序号”就填一下。</div>
+  </div>
+
+  <div class="card">
+    <h3>选择视频</h3>
+    <select id="videoSelect">
+      <option value="">-- 请选择 --</option>
+      {% for v in videos %}
+        <option value="{{v['id']}}">{{v['original_name']}}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div id="playerCard" class="card hidden">
+    <h3>播放器</h3>
+    <video id="video" controls preload="metadata"></video>
+
+    <div class="timeline">
+      <input id="scrub" type="range" min="0" max="1000" value="0">
+      <div class="row space-between">
+        <div>当前时间：<span id="now">00:00</span></div>
+        <div>总时长：<span id="dur">--:--</span></div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card inner">
+        <h4>添加：游戏玩法分段（Segmentation）</h4>
+        <div class="row">
+          <button id="setStart">设为开始点</button>
+          <button id="setEnd">设为结束点</button>
+        </div>
+        <div class="muted">开始：<span id="segStart">--:--</span>；结束：<span id="segEnd">--:--</span></div>
+        <input id="dominant" placeholder="主导机制（例如 Skill / Chance / Information）">
+        <input id="decision" placeholder="玩家核心决策（例如 什么时候躲避）">
+        <input id="risk" placeholder="风险（Low/Medium/High）">
+        <button id="addSeg">添加分段</button>
+      </div>
+
+      <div class="card inner">
+        <h4>添加：行为观察（Observation）</h4>
+        <textarea id="note" rows="5" placeholder="只写可观察事实：例如 00:35 玩家打开地图；00:42 玩家躲避攻击"></textarea>
+        <button id="addObs">在当前时间点添加观察</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <a id="exportSeg" class="btn" href="#">导出分段表 CSV</a>
+      <a id="exportObs" class="btn" href="#">导出观察表 CSV</a>
+    </div>
+  </div>
+
+  <div id="dataCard" class="card hidden">
+    <h3>已添加的批注</h3>
+    <div class="grid2">
+      <div>
+        <h4>分段（Segmentation）</h4>
+        <div id="segList" class="list"></div>
+      </div>
+      <div>
+        <h4>观察（Observations）</h4>
+        <div id="obsList" class="list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.PROJECT_ID = {{project['id']}};
+  </script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Video Annotator</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="container">
+  <h1>Video Annotator</h1>
+
+  <form action="/projects/new" method="post" class="card">
+    <div class="row">
+      <input name="name" placeholder="项目名称（例如：CS2 Showcase 分析）" />
+      <button type="submit">新建项目</button>
+    </div>
+  </form>
+
+  <h2>Projects</h2>
+  <div class="list">
+    {% for p in projects %}
+      <a class="item" href="/projects/{{p['id']}}">
+        <div class="title">{{p['name']}}</div>
+        <div class="meta">{{p['created_at']}}</div>
+      </a>
+    {% else %}
+      <div class="muted">暂无项目</div>
+    {% endfor %}
+  </div>
+</body>
+</html>

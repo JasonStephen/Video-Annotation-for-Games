@@ -47,15 +47,34 @@
     <div class="grid2">
       <div class="card inner">
         <h4>添加：游戏玩法分段（Segmentation）</h4>
+
+        <!-- 当前时间点 -->
         <div class="row">
-          <button id="setStart">设为开始点</button>
-          <button id="setEnd">设为结束点</button>
+          <button id="setStart">设为开始</button>
+          <button id="setEnd">设为结束</button>
+          <div class="muted">
+            Start: <span id="segStart">--:--</span>
+            End: <span id="segEnd">--:--</span>
+          </div>
         </div>
-        <div class="muted">开始：<span id="segStart">--:--</span>；结束：<span id="segEnd">--:--</span></div>
-        <input id="dominant" placeholder="主导机制（例如 Skill / Chance / Information）">
-        <input id="decision" placeholder="玩家核心决策（例如 什么时候躲避）">
-        <input id="risk" placeholder="风险（Low/Medium/High）">
+
+        <!-- 手动输入 -->
+        <div class="grid2">
+          <input id="segStartInput" placeholder="开始时间 mm:ss">
+          <input id="segEndInput" placeholder="结束时间 mm:ss">
+        </div>
+
+        <!-- 分段信息 -->
+        <div class="grid2">
+          <input id="dominant" placeholder="Dominant (Skill / Chance / Information)">
+          <input id="risk" placeholder="Risk (Low / Medium / High)">
+        </div>
+
+        <input id="decision" placeholder="Core Player Decision">
+
+        <!-- 添加 -->
         <button id="addSeg">添加分段</button>
+
       </div>
 
       <div class="card inner">
@@ -82,6 +101,34 @@
         <h4>观察（Observations）</h4>
         <div id="obsList" class="list"></div>
       </div>
+    </div>
+  </div>
+
+  <div id="editModal" class="modal hidden">
+    <div class="modal-box">
+
+      <h3>编辑 Segmentation</h3>
+
+      <label>开始时间</label>
+      <input id="editStart">
+
+      <label>结束时间</label>
+      <input id="editEnd">
+
+      <label>主导机制</label>
+      <input id="editDominant">
+
+      <label>核心决策</label>
+      <input id="editDecision">
+
+      <label>风险</label>
+      <input id="editRisk">
+
+      <div class="row">
+        <button id="saveEdit">保存</button>
+        <button id="cancelEdit">取消</button>
+      </div>
+
     </div>
   </div>
 

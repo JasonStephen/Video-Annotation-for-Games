@@ -11,7 +11,7 @@ h1,h2,h3,h4 { margin: 12px 0; }
 .title { font-weight: 650; }
 .meta { color: #666; font-size: 13px; margin-top: 6px; }
 .muted { color: #777; font-size: 13px; }
-.hidden { display: none; }
+
 .drop { border: 2px dashed #bbb; border-radius: 12px; padding: 16px; position: relative; }
 .drop.hover { border-color: #333; }
 .drop input[type="file"] { display: block; margin-top: 10px; }
@@ -21,3 +21,27 @@ button.danger { border-color: #c00; color: #c00; }
 video { width: 100%; border-radius: 12px; background: #000; margin: 10px 0; }
 .timeline { margin-top: 8px; }
 .timeline input[type="range"] { width: 100%; }
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.modal-box{
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  width:320px;
+  display:grid;
+  gap:8px;
+}
+
+.card.inner{
+  display:grid;
+  gap:10px;
+}
+
+.hidden { display: none; }

@@ -34,7 +34,14 @@ async function refresh() {
     div.className = "item";
 
     div.innerHTML = `
-      <div class="title">S${idx+1} ${mmss(a.t_start)}–${mmss(a.t_end)}</div>
+      <div class="title">
+        S${idx+1} ${mmss(a.t_start)}–${mmss(a.t_end)}
+      </div>
+
+      <div class="row">
+        <button class="jumpStart">▶Start</button>
+        <button class="jumpEnd">▶End</button>
+      </div>
       <div class="meta">主导机制：${a.dominant_category || ""}｜决策：${a.core_decision || ""}｜风险：${a.risk || ""}</div>
 
       <div class="row">
@@ -45,27 +52,34 @@ async function refresh() {
       </div>
     `;
 
+    div.querySelector(".title").onclick = ()=>{
+      $("video").currentTime = a.t_start;
+    };
+
+    div.querySelector(".jumpStart").onclick = () => {
+      const video = $("video");
+      video.currentTime = a.t_start;
+    };
+
+    div.querySelector(".jumpEnd").onclick = () => {
+      const video = $("video");
+      video.currentTime = a.t_end;
+    };
+
     div.querySelector(".up").onclick = () => move(idx, -1);
     div.querySelector(".down").onclick = () => move(idx, 1);
 
-    div.querySelector(".edit").onclick = async () => {
-      const dominant = prompt("主导机制", a.dominant_category);
-      const decision = prompt("核心决策", a.core_decision);
-      const risk = prompt("风险", a.risk);
+    div.querySelector(".edit").onclick = () => {
 
-      await fetch(`/api/annotations/${a.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          t_start: a.t_start,
-          t_end: a.t_end,
-          dominant_category: dominant,
-          core_decision: decision,
-          risk: risk
-        })
-      });
+      editingId = a.id;
 
-      refresh();
+      $("editStart").value = mmss(a.t_start);
+      $("editEnd").value = mmss(a.t_end);
+      $("editDominant").value = a.dominant_category || "";
+      $("editDecision").value = a.core_decision || "";
+      $("editRisk").value = a.risk || "";
+
+      $("editModal").classList.remove("hidden");
     };
 
     div.querySelector(".danger").onclick = async () => {
@@ -192,20 +206,61 @@ function bindPlayer() {
   $("setStart").onclick = () => {
     segStartSec = video.currentTime;
     $("segStart").textContent = mmss(segStartSec);
+
+    // 自动填充输入框
+    $("segStartInput").value = mmss(segStartSec);
   };
+
   $("setEnd").onclick = () => {
     segEndSec = video.currentTime;
     $("segEnd").textContent = mmss(segEndSec);
+
+    // 自动填充输入框
+    $("segEndInput").value = mmss(segEndSec);
+  };
+
+  // 手动输入时间 → 自动跳转视频
+  $("segStartInput").onchange = ()=>{
+    const t = parseTime($("segStartInput").value);
+    if(t!=null) video.currentTime = t;
+  };
+
+  $("segEndInput").onchange = ()=>{
+    const t = parseTime($("segEndInput").value);
+    if(t!=null) video.currentTime = t;
   };
 
   $("addSeg").onclick = async () => {
-    if (segStartSec == null || segEndSec == null) return alert("请先设置开始点和结束点");
-    if (segEndSec < segStartSec) return alert("结束点不能早于开始点");
+
+    let start = segStartSec;
+    let end = segEndSec;
+
+    // 如果手动输入时间
+    const startInput = $("segStartInput").value.trim();
+    const endInput = $("segEndInput").value.trim();
+
+    if(startInput){
+      const t = parseTime(startInput);
+      if(t === null) return alert("开始时间格式错误，应为 mm:ss");
+      start = t;
+    }
+
+    if(endInput){
+      const t = parseTime(endInput);
+      if(t === null) return alert("结束时间格式错误，应为 mm:ss");
+      end = t;
+    }
+
+    if(start == null || end == null)
+      return alert("请设置开始和结束时间");
+
+    if(end < start)
+      return alert("结束时间不能早于开始时间");
 
     const payload = {
       type: "segmentation",
-      t_start: segStartSec,
-      t_end: segEndSec,
+      t_start: start,
+      t_end: end,
       dominant_category: $("dominant").value,
       core_decision: $("decision").value,
       risk: $("risk").value
@@ -216,13 +271,25 @@ function bindPlayer() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    if (!data.ok) return alert(data.error || "添加失败");
 
-    // 清理（可选）
+    const data = await res.json();
+
+    if (!data.ok)
+      return alert(data.error || "添加失败");
+
+    // 清理输入
     $("dominant").value = "";
     $("decision").value = "";
     $("risk").value = "";
+    $("segStartInput").value = "";
+    $("segEndInput").value = "";
+
+    segStartSec = null;
+    segEndSec = null;
+
+    $("segStart").textContent = "--:--";
+    $("segEnd").textContent = "--:--";
+
     refresh();
   };
 
@@ -274,5 +341,40 @@ async function move(index, direction) {
   refresh();
 }
 
-bindUploadUI();
-bindPlayer();
+let editingId = null;
+
+function parseTime(t){
+  const [m,s] = t.split(":").map(Number);
+  return m*60 + s;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  bindUploadUI();
+  bindPlayer();
+
+  $("saveEdit").onclick = async () => {
+
+    const payload = {
+      t_start: parseTime($("editStart").value),
+      t_end: parseTime($("editEnd").value),
+      dominant_category: $("editDominant").value,
+      core_decision: $("editDecision").value,
+      risk: $("editRisk").value
+    };
+
+    await fetch(`/api/annotations/${editingId}`,{
+      method:"PUT",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(payload)
+    });
+
+    $("editModal").classList.add("hidden");
+    refresh();
+  };
+
+  $("cancelEdit").onclick = ()=>{
+    $("editModal").classList.add("hidden");
+  };
+
+});
